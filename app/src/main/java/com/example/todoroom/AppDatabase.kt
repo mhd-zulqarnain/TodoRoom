@@ -20,12 +20,14 @@ abstract class AppDatabase : RoomDatabase() {
                         AppDatabase::class.java,
                         AppDatabase.DATABASE_NAME
                     )
+                        .allowMainThreadQueries()
                         .build()
                 }
             }
             return sInstance!!
         }
     }
-    abstract fun taskDao():TaskDao
+
+    abstract fun taskDao(): TaskDao
 
 }

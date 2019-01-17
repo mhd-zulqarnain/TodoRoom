@@ -1,5 +1,6 @@
 package com.example.todoroom
 
+import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
 import android.arch.persistence.room.Ignore
 import android.arch.persistence.room.PrimaryKey
@@ -12,6 +13,7 @@ class TaskEntry {
     var id: Int = 0
     var description: String? = null
     var priority: Int = 0
+    @ColumnInfo(name="updated_at")
     var updatedAt: Date? = null
 
     @Ignore

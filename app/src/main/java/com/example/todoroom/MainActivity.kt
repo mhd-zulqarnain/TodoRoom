@@ -81,9 +81,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun retreiveData() {
         AppExecutors.getInstance().diskIO.execute(object : Runnable {
-            var list = mDb.taskDao().loadAllEntry()
+            val list = mDb.taskDao().loadAllEntry()
             override fun run() {
-                mAdapter!!.setTasks( list as ArrayList);
+                runOnUiThread{
+                    mAdapter!!.setTasks( list as ArrayList);
+                }
             }
         })
     }

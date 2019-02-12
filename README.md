@@ -6,7 +6,7 @@
 
 ### error and solution
 - android-room-persistent-appdatabase-impl-does-not-exist
-```
+``` java
    apply plugin: 'kotlin-kapt'
    implementation "android.arch.lifecycle:extensions:1.1.1"
     kapt "android.arch.lifecycle:compiler:1.1.1"

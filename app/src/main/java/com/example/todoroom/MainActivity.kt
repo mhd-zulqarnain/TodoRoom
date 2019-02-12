@@ -1,41 +1,91 @@
 package com.example.todoroom
 
+
+import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.DividerItemDecoration
+import android.support.v7.widget.DividerItemDecoration.VERTICAL
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.Menu
 import android.view.MenuItem
-
 import kotlinx.android.synthetic.main.activity_main.*
+
 
 class MainActivity : AppCompatActivity() {
 
     lateinit var mDb: AppDatabase
+    private var mAdapter: TaskAdapter? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
         mDb = AppDatabase.getInstance(this)
+        mAdapter = TaskAdapter(this@MainActivity) {
 
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
         }
+        mRecyclerView.setLayoutManager(LinearLayoutManager(this));
+        mRecyclerView.adapter = mAdapter
+        fab.setOnClickListener { view ->
+            startActivity(Intent(this@MainActivity, AddTaskActivity::class.java))
+        }
+        val decoration = DividerItemDecoration(applicationContext, VERTICAL)
+        mRecyclerView.addItemDecoration(decoration)
+
+        ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return false
+            }
+
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int) {
+                AppExecutors.getInstance().diskIO.execute(object :Runnable{
+                    override fun run() {
+                        var position = viewHolder.adapterPosition
+                        var obj = mAdapter!!.getTasks().get(position)
+                        mDb.taskDao().deleteTask(obj)
+                        retreiveData()
+                    }
+
+                })
+
+
+            }
+        }).attachToRecyclerView(mRecyclerView)
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        retreiveData()
+    }
+
+    private fun retreiveData() {
+        AppExecutors.getInstance().diskIO.execute(object : Runnable {
+            var list = mDb.taskDao().loadAllEntry()
+            override fun run() {
+                mAdapter!!.setTasks( list as ArrayList);
+            }
+        })
+    }
+
 }

@@ -52,7 +52,7 @@ class TaskAdapter(var ctx: Context, private val onClick: (TaskEntry) -> Unit) :
             ex.printStackTrace()
         }
 
-        onClick(list[position])
+
     }
 
     private fun getPriorityColor(priority: Int): Int {

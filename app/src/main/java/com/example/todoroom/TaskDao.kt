@@ -16,4 +16,7 @@ interface TaskDao {
 
     @Delete
     fun deleteTask(taskEntry: TaskEntry)
+
+    @Query("SELECT * FROM task WHERE id = :id")
+    fun loadTaskByid(id:Int):TaskEntry
 }

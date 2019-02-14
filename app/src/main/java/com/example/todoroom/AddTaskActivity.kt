@@ -1,7 +1,7 @@
 package com.example.todoroom
 
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_add_task.*
 import java.util.*
 
@@ -17,12 +17,12 @@ class AddTaskActivity : AppCompatActivity() {
         private val DEFAULT_TASK_ID = -1
     }
 
+
     private var mTaskId = DEFAULT_TASK_ID
 
     private var mDb: AppDatabase? = null
 
     val priorityFromViews: Int
-
         get() {
             var priority = 1
             val checkedId = radioGroup.checkedRadioButtonId
@@ -50,6 +50,17 @@ class AddTaskActivity : AppCompatActivity() {
         if (intent != null && intent.hasExtra(EXTRA_TASK_ID)) {
             saveButton.setText(R.string.update_button)
             if (mTaskId == DEFAULT_TASK_ID) {
+                mTaskId = intent.getIntExtra(EXTRA_TASK_ID, DEFAULT_TASK_ID)
+
+                AppExecutors.getInstance().diskIO().execute(object : Runnable {
+                    override fun run() {
+                        val task = mDb!!.taskDao().loadTaskByid(mTaskId)
+                        runOnUiThread {
+                            populateUI(task)
+                        }
+                    }
+
+                })
             }
         }
     }
@@ -66,13 +77,15 @@ class AddTaskActivity : AppCompatActivity() {
 
 
         saveButton.setOnClickListener {
-                onSaveButtonClicked()
+            onSaveButtonClicked()
         }
     }
 
 
     private fun populateUI(task: TaskEntry) {
 
+        setPriorityInViews(task.priority)
+        editTextTaskDescription.setText(task.description)
     }
 
 
@@ -82,8 +95,19 @@ class AddTaskActivity : AppCompatActivity() {
         val date = Date()
 
         val taskEntry = TaskEntry(description, priority, date)
-        mDb!!.taskDao().insertTast(taskEntry);
-        finish()
+
+        AppExecutors.getInstance().diskIO.execute(Runnable {
+
+
+            if (mTaskId == DEFAULT_TASK_ID)
+                mDb!!.taskDao().insertTast(taskEntry);
+            else {
+                taskEntry.id = mTaskId
+                mDb!!.taskDao().updateTask(taskEntry);
+
+            }
+            finish()
+        })
     }
 
 

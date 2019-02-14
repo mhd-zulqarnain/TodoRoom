@@ -18,18 +18,22 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var mDb: AppDatabase
     private var mAdapter: TaskAdapter? = null
-
+    val EXTRA_TASK_ID = "extraTaskId"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
         mDb = AppDatabase.getInstance(this)
-        mAdapter = TaskAdapter(this@MainActivity) {
+        mAdapter = TaskAdapter(this@MainActivity){
+            val intent = Intent(this@MainActivity, AddTaskActivity::class.java)
+            intent.putExtra(AddTaskActivity.EXTRA_TASK_ID,it.id)
+            startActivity(intent)
 
         }
         mRecyclerView.setLayoutManager(LinearLayoutManager(this));
         mRecyclerView.adapter = mAdapter
         fab.setOnClickListener { view ->
+
             startActivity(Intent(this@MainActivity, AddTaskActivity::class.java))
         }
         val decoration = DividerItemDecoration(applicationContext, VERTICAL)

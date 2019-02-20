@@ -1,12 +1,13 @@
 package com.example.todoroom
 
+import android.arch.lifecycle.LiveData
 import android.arch.persistence.room.*
 
 @Dao
 interface TaskDao {
 
     @Query("SELECT * FROM task ORDER BY priority")
-    fun loadAllEntry(): List<TaskEntry>
+    fun loadAllEntry(): LiveData<List<TaskEntry>>
 
     @Insert
     fun insertTast(taskEntry: TaskEntry)
@@ -18,5 +19,5 @@ interface TaskDao {
     fun deleteTask(taskEntry: TaskEntry)
 
     @Query("SELECT * FROM task WHERE id = :id")
-    fun loadTaskByid(id:Int):TaskEntry
+    fun loadTaskByid(id:Int):LiveData<TaskEntry>
 }

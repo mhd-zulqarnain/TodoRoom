@@ -1,6 +1,7 @@
 package com.example.todoroom
 
 
+import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -24,9 +25,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
         mDb = AppDatabase.getInstance(this)
-        mAdapter = TaskAdapter(this@MainActivity){
+        mAdapter = TaskAdapter(this@MainActivity) {
             val intent = Intent(this@MainActivity, AddTaskActivity::class.java)
-            intent.putExtra(AddTaskActivity.EXTRA_TASK_ID,it.id)
+            intent.putExtra(AddTaskActivity.EXTRA_TASK_ID, it.id)
             startActivity(intent)
 
         }
@@ -50,7 +51,7 @@ class MainActivity : AppCompatActivity() {
 
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int) {
-                AppExecutors.getInstance().diskIO.execute(object :Runnable{
+                AppExecutors.getInstance().diskIO.execute(object : Runnable {
                     override fun run() {
                         var position = viewHolder.adapterPosition
                         var obj = mAdapter!!.getTasks().get(position)
@@ -84,12 +85,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun retreiveData() {
-        AppExecutors.getInstance().diskIO.execute(object : Runnable {
-            val list = mDb.taskDao().loadAllEntry()
-            override fun run() {
-                runOnUiThread{
-                    mAdapter!!.setTasks( list as ArrayList);
-                }
+        val list = mDb.taskDao().loadAllEntry()
+        list.observe(this@MainActivity, object : Observer<List<TaskEntry>> {
+            override fun onChanged(list: List<TaskEntry>?) {
+                print("get the data")
+                mAdapter!!.setTasks(list as ArrayList);
             }
         })
     }

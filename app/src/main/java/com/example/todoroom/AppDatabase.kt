@@ -3,7 +3,7 @@ package com.example.todoroom
 import android.arch.persistence.room.*
 import android.content.Context
 
-@Database(entities = [TaskEntry::class], version = 1, exportSchema = false)
+@Database(entities = [TaskEntry::class], version =1, exportSchema = false)
 @TypeConverters(DateConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     companion object {

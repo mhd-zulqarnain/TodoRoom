@@ -2,6 +2,8 @@ package com.example.todoroom
 
 
 import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProvider
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -85,8 +87,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun retreiveData() {
-        val list = mDb.taskDao().loadAllEntry()
-        list.observe(this@MainActivity, object : Observer<List<TaskEntry>> {
+
+        ViewModelProviders.
+            of(this).get(MainViewModel::class.java).
+            tasks.
+            observe(this@MainActivity, object : Observer<List<TaskEntry>> {
             override fun onChanged(list: List<TaskEntry>?) {
                 print("get the data")
                 mAdapter!!.setTasks(list as ArrayList);

@@ -1,6 +1,7 @@
 package com.example.todoroom
 
 import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_add_task.*
@@ -52,10 +53,13 @@ class AddTaskActivity : AppCompatActivity() {
             saveButton.setText(R.string.update_button)
             if (mTaskId == DEFAULT_TASK_ID) {
                 mTaskId = intent.getIntExtra(EXTRA_TASK_ID, DEFAULT_TASK_ID)
-                val task = mDb!!.taskDao().loadTaskByid(mTaskId)
-                task.observe(this@AddTaskActivity,object :Observer<TaskEntry>{
+                val factory = AddTaskViewModelFactory(mDb!!,mTaskId)
+                val viewModel = ViewModelProviders.of(this, factory).get(AddTaskViewModel::class.java)
+
+                viewModel.tasks
+                    .observe(this@AddTaskActivity,object :Observer<TaskEntry>{
                     override fun onChanged(t: TaskEntry?) {
-                        task.removeObserver(this)
+                        viewModel.tasks.removeObserver(this)
                         populateUI(t!!)
                     }
                 })
